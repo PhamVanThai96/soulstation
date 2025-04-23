@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Physics Problem</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #1d1f27;
+      color: white;
+      display: flex;
+      height: 100vh;
+    }
+
+    .left-panel {
+      width: 30%;
+      background-color: #111;
+      padding: 30px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+
+    .right-panel {
+      width: 70%;
+      padding: 30px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .code-box {
+      background-color: #0f0f0f;
+      padding: 20px;
+      border-radius: 6px;
+      font-family: monospace;
+      color: #8ac6ff;
+      margin-top: 10px;
+      font-size: 16px;
+      min-height: 150px;
+    }
+
+    .answer-section {
+      font-weight: bold;
+      margin-top: 30px;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 30px;
+    }
+
+    .btn {
+      padding: 8px 15px;
+      border: 1px solid #ccc;
+      background-color: white;
+      color: black;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .progress-container {
+      flex-grow: 1;
+      padding: 0 20px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      background-color: #444;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 40%;
+      height: 100%;
+      background-color: #4caf50;
+    }
+  </style>
+</head>
+<body>
+
+<div class="left-panel">
+    <h2>Particle Physics</h2>
+    <p><strong>Original:</strong> (<span id="question-id">{{ question.id }}</span>)</p>
+    <p id="question-original">{{ question.original }}</p>
+    <p><strong>Translated:</strong></p>
+    <p id="question-translated">{{ question.translated }}</p>
+</div>
+
+  <div class="right-panel">
+    <div class="code-area">
+      <h2>Problem</h2>
+      <div class="code-box">// Input solution right here</div>
+
+      <div class="answer-section">
+        Correct Answer<br>
+        Answer =
+      </div>
+    </div>
+
+<div class="footer">
+    <button class="btn" onclick="loadPreviousQuestion()">← Previous Question</button>
+    <div class="progress-container">
+        <div class="progress-bar">
+          <div class="progress-fill"></div>
+        </div>
+      </div>
+    <button class="btn" onclick="loadNextQuestion()">Next Question →</button>
+  </div>
+  
+  <script>
+    function loadNextQuestion() {
+      const currentId = document.getElementById('question-id').innerText;
+      fetch('/next-question/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: 'current_id=' + currentId
+      })
+      .then(response => response.json())
+      .then(data => updateQuestion(data));
+    }
+  
+    function loadPreviousQuestion() {
+      const currentId = document.getElementById('question-id').innerText;
+      fetch('/previous-question/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: 'current_id=' + currentId
+      })
+      .then(response => response.json())
+      .then(data => updateQuestion(data));
+    }
+  
+    function updateQuestion(data) {
+      document.getElementById('question-id').innerText = data.id;
+      document.getElementById('question-original').innerText = data.original;
+      document.getElementById('question-translated').innerText = data.translated;
+    }
+  
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+  </script>
+  
+</body>
+</html>
