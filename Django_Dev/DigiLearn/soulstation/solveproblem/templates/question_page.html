@@ -103,14 +103,13 @@
       </div>
     </div>
 
-<div class="footer">
-    <button class="btn" onclick="loadPreviousQuestion()">← Previous Question</button>
-    <div class="progress-container">
-        <div class="progress-bar">
-          <div class="progress-fill"></div>
-        </div>
-      </div>
-    <button class="btn" onclick="loadNextQuestion()">Next Question →</button>
+  <div class="footer">
+    <button id="prevBtn" class="btn" onclick="loadPreviousQuestion()">← Previous Question</button>
+    <div style="flex-grow: 1; margin: 0 20px;">
+      <progress id="progressBar" value="1" max="10" style="width: 100%; height: 20px;"></progress>
+      <p style="text-align: center;">Câu hỏi <span id="current">1</span> / <span id="total">10</span></p>
+    </div>
+    <button id="nextBtn" class="btn" onclick="loadNextQuestion()">Next Question →</button>
   </div>
   
   <script>
@@ -161,6 +160,31 @@
         }
       }
       return cookieValue;
+    }
+
+    let current = 1;
+    const total = 10;
+
+    const progressBar = document.getElementById("progressBar");
+    const currentDisplay = document.getElementById("current");
+
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      if (current < total) {
+        current++;
+        updateProgress();
+      }
+    });
+
+    document.getElementById("prevBtn").addEventListener("click", () => {
+      if (current > 1) {
+        current--;
+        updateProgress();
+      }
+    });
+
+    function updateProgress() {
+      progressBar.value = current;
+      currentDisplay.textContent = current;
     }
   </script>
   

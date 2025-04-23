@@ -3,6 +3,29 @@ import requests
 from bs4 import BeautifulSoup
 from googletrans import Translator
 
+import sys
+import os
+import django
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname('__file__'), '..')))
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'soulstation.settings')
+django.setup()
+
+from solveproblem.models import Question
+
+def insert_question_to_database(original, translated, answer="NULL", category="physics"):
+    q = Question(
+        original_text = original,
+        translated_text = translated,
+        answer_string = answer,
+        category = category
+    )
+    q.save()
+    return
+
+
+
 # Function to wrap synchronous translation
 async def translate_text_async(text, src='en', dest='vi'):
     async with Translator() as translator:
@@ -23,9 +46,13 @@ def translate_problem_divs(soup):
     for div in divs:
         original = div.get_text(separator=' ', strip=True)
         if original:
-            print("\nOrigin: ", original)
+            # print("\nOrigin: ", original)
             output = asyncio.run(translate_text_async(original))
-            print("\nOutput: ", output.text)
+            # print("\nOutput: ", output.text)
+            insert_question_to_database(original, output.text)
+
+    print("\n\n ===== Show Database ===== \n")
+    print(Question.objects.all()[0].translated_text)
 
     # translated_texts = await asyncio.gather(*tasks)
 

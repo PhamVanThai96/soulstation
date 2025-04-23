@@ -140,6 +140,13 @@ Section 5: Additional Django Configuration
 
         'python manage.py shell'
 
+        Lookup database in shell mode
+
+        'from members.models import Member'
+
+        'Member.objects.all()'
+
+
     Modifying Allowed Hosts:
 
         By default, Django only allows requests from localhost. To allow requests from your domain or IP address, open the settings.py file and locate the ALLOWED_HOSTS list. Add your domain or IP address to the list, like this:

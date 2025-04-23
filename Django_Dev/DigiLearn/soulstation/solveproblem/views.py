@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
 from django.views.decorators.csrf import csrf_exempt
+from .models import Question
 
 
 def members(request):
@@ -37,20 +38,37 @@ QUESTIONS = [
 #     return render(request, 'question_page.html', {'question': question_data})
 
 
+def random_k_questions(k):
+    total = Question.objects.count()
+    k = min(k, total)
+    question_list = Question.objects.order_by('?')[:k]
+
+    global QUESTIONS
+    QUESTIONS = [{
+        'id': q.question_id,
+        'original': q.original_text,
+        'translated': q.translated_text
+    } for q in question_list]
+
+    return
+
 def question_page(request):
+    number_questions = 10
+    random_k_questions(number_questions)
+
     return render(request, 'question_page.html', {'question': QUESTIONS[0]})
 
 @csrf_exempt
 def get_next_question(request):
     if request.method == 'POST':
         current_id = int(request.POST.get('current_id', 1))
-        next_index = current_id % len(QUESTIONS)
+        next_index = max((current_id + 1), len(QUESTIONS))
         return JsonResponse(QUESTIONS[next_index])
 
 @csrf_exempt
 def get_previous_question(request):
     if request.method == 'POST':
         current_id = int(request.POST.get('current_id', 1))
-        prev_index = (current_id - 2) % len(QUESTIONS)
+        prev_index = min(0, (current_id - 1))
         return JsonResponse(QUESTIONS[prev_index])
 
