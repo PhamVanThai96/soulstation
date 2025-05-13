@@ -2,6 +2,7 @@ import asyncio
 import requests
 from bs4 import BeautifulSoup
 from googletrans import Translator
+import json
 
 import sys
 import os

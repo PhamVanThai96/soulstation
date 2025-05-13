@@ -13,6 +13,14 @@
       height: 100vh;
     }
 
+    a {
+    color: rgb(169, 190, 8); /* hoặc mã màu như #FF5733 */
+    }
+
+    a:hover {
+      color: darkorange; /* khi di chuột qua */
+    }
+
     .left-panel {
       width: 30%;
       background-color: #111;
@@ -41,10 +49,30 @@
       min-height: 150px;
     }
 
-    .answer-section {
-      font-weight: bold;
-      margin-top: 30px;
+    .answer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
     }
+
+    .submit-button {
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .answer-box {
+        margin-top: 10px;
+        padding: 15px;
+        border: 2px solid #ccc;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        font-size: 16px;
+        min-height: 50px;
+    }
+
 
     .footer {
       display: flex;
@@ -81,15 +109,31 @@
       background-color: #4caf50;
     }
   </style>
+    <script>
+      window.MathJax = {
+        loader: { load: ['input/mml', 'output/chtml'] },
+        options: {
+          renderActions: {
+            findMathML: [10, (doc) => {
+              for (const math of document.querySelectorAll('math')) {
+                doc.math.push(MathJax.startup.toMML(math));
+              }
+            }, '']
+          }
+        }
+      };
+      </script>
+      <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/startup.js" async></script>  
+
 </head>
 <body>
 
 <div class="left-panel">
     <h2>Particle Physics</h2>
     <p><strong>Original:</strong> (<span id="question-id">{{ question.id }}</span>)</p>
-    <p id="question-original">{{ question.original }}</p>
+    <p id="question-original">{{ question.original|safe }}</p>
     <p><strong>Translated:</strong></p>
-    <p id="question-translated">{{ question.translated }}</p>
+    <p id="question-translated">{{ question.translated|safe }}</p>
 </div>
 
   <div class="right-panel">
@@ -97,10 +141,16 @@
       <h2>Problem</h2>
       <div class="code-box">// Input solution right here</div>
 
-      <div class="answer-section">
-        Correct Answer<br>
-        Answer =
-      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+        <div><h3>Correct Answer:</h3></div>
+        <div>
+            <button onclick="submitAnswer()" style="padding: 10px 20px; font-size: 16px; border-radius: 6px;">
+                Submit
+            </button>
+        </div>
+    </div>
+    <div id="answer"></div>
+    
     </div>
 
   <div class="footer">
@@ -113,6 +163,26 @@
   </div>
   
   <script>
+
+    function submitAnswer() {
+      fetch('/get-answer/', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: JSON.stringify({ question_number: 8 })
+      })
+      .then(response => response.json())
+      .then(data => {
+          document.getElementById('answer').innerHTML = data.answer_html;
+      })
+      .catch(error => {
+          document.getElementById('answer').innerText = "Lỗi khi lấy câu trả lời.";
+          console.error(error);
+      });
+    }
+
     function loadNextQuestion() {
       const currentId = document.getElementById('question-id').innerText;
       fetch('/next-question/', {
